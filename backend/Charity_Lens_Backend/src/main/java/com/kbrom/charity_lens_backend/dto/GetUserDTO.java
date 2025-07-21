@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class UserInfoDTO {
+public class GetUserDTO {
     private Long id;
     private String firstName;
     private  String lastName;
