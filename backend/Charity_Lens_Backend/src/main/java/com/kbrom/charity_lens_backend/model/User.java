@@ -17,14 +17,19 @@ public class User {
     private Long id;
     @Column(nullable=false,unique = true)
     private String username;
+    @Column(nullable=false)
     private String firstName;
+    @Column(nullable=false)
     private String lastName;
     @Column(nullable = false,unique = true)
-    @Email
+    @Email(message="Enter a valid email address")
     private String email;
     @Size(min=8,max=20,message = "password must be between 8-20")
     private String password;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Gender gender;
-
 }
