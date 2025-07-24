@@ -13,7 +13,7 @@ public class Project {
     private  Long id;
     @Column(nullable = false)
     private  String name;
-    @ManyToOne
+    @ManyToOne    // an organization can have many projects
     private CharityOrganization organization;
     private boolean isActive;
     private BigDecimal donationGoal;
