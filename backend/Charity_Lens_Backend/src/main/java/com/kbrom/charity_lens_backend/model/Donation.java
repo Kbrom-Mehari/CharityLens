@@ -2,9 +2,12 @@ package com.kbrom.charity_lens_backend.model;
 
 import com.kbrom.charity_lens_backend.model.enums.Currency;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
-
+@Getter
+@Setter
 @Entity
 public class Donation {
     @Id
