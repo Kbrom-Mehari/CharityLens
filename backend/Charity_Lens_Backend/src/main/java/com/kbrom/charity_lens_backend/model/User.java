@@ -32,4 +32,5 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Gender gender;
+    private boolean isFlagged=false;
 }
