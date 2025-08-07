@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Entity
@@ -24,5 +26,6 @@ public class Donation {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Currency currency;
+    private LocalDateTime createdAt;
 
 }
