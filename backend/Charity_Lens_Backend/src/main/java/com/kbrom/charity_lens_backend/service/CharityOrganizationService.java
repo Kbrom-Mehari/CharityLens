@@ -35,7 +35,7 @@ public class CharityOrganizationService {
         return getOrganizationMapper.toDTO(organization);
     }
     public GetOrganizationDTO getOrganizationByEmail(String email) {
-        CharityOrganization organization = charityOrganizationRepository.findByEmail(email);
+        CharityOrganization organization = charityOrganizationRepository.findByEmail(email).orElseThrow(()->new ResourceNotFoundException("Organization not found"));
         return getOrganizationMapper.toDTO(organization);
     }
     public List<GetOrganizationDTO> searchOrganizationsByName(String name){
