@@ -20,15 +20,12 @@ public class UserService {
       private final GetUserMapper getUserMapper;
       private final RegisterUserMapper registerUserMapper;
       public GetUserDTO getUserByEmail(String email) {
-        User user= userRepository.findByEmail(email);
-        if(user==null) {
-            throw new ResourceNotFoundException("User Not Found");
-        }
+        User user= userRepository.findByEmail(email).orElseThrow(()->new ResourceNotFoundException("User Not Found"));
         return getUserMapper.toDTO(user);
       }
       public List<GetUserDTO> getAllUsers(){
           List<User> users= userRepository.findAll();
-          return getUserMapper.toListDTO(users);
+          return getUserMapper.toDTO_List(users);
       }
       public GetUserDTO getUserById(Long id) {
           User user = userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User Not Found"));
