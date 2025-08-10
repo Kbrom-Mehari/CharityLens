@@ -1,8 +1,18 @@
 package com.kbrom.charity_lens_backend.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class FocusArea {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -13,5 +23,12 @@ public class FocusArea {
     private String description;
     @Column(nullable = false)
     private String sdgGoal;
+    @ManyToMany(mappedBy="focusAreas")
+    private List<CharityOrganization> charityOrganizations=new ArrayList<>();
 
+public FocusArea(String name, String description, String sdgGoal) {
+    this.name = name;
+    this.description = description;
+    this.sdgGoal = sdgGoal;
+}
 }
