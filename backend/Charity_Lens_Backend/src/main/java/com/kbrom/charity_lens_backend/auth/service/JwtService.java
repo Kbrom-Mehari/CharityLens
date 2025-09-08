@@ -1,5 +1,7 @@
 package com.kbrom.charity_lens_backend.auth.service;
 
+import com.kbrom.charity_lens_backend.auth.exception.TokenGenerationException;
+import com.kbrom.charity_lens_backend.auth.exception.TokenValidationException;
 import com.kbrom.charity_lens_backend.common.config.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -20,50 +22,54 @@ public class JwtService{
     private final JwtProperties jwtProperties;
     private final SecretKey signingKey;
     public JwtService(JwtProperties jwtProperties){
-        this.jwtProperties = jwtProperties;
+        this.jwtProperties=jwtProperties;
         this.signingKey=hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret()));
     }
-    public final String generateToken(Map<String,Object> extraClaims,String username ){
-       return Jwts.builder()
-            .claims(extraClaims)
-            .subject(username)
-            .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis()+jwtProperties.getExpiration()))
-            .signWith(signingKey)
-            .compact();
+    public String generateToken(Map<String,Object> claims,String username){
+        try {
+            return Jwts.builder()
+                    .claims(claims)
+                    .subject(username)
+                    .issuedAt(new Date())
+                    .expiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
+                    .signWith(signingKey)
+                    .compact();
+        }
+        catch(JwtException | IllegalArgumentException e) {
+            throw new TokenGenerationException("Token Generation Failed",e);
+        }
     }
-    public final String generateToken(String username){
-       return generateToken(Map.of(),username);
+    public String generateToken(String username){
+        return generateToken(Map.of(),username);
     }
-    private final Claims getClaimsFromToken(String token){
-        try{
+    private Claims getClaimsFromToken(String token) {
+        try {
             return Jwts.parser()
                     .verifyWith(signingKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
         }
-        catch (JwtException ex){
-            throw new RuntimeException("Invalid token", ex);
+        catch (JwtException e) {
+            throw new TokenValidationException("Invalid Token",e);
         }
-
     }
-    private final <T> T getClaimFromToken(String token, Function<Claims,T > claimsResolver){
+    private <T> T getClaimFromToken(String token,Function<Claims,T> claimsResolver) {
         final Claims claims=getClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
-    public final String getSubjectFromToken(String token){
-        return getClaimFromToken(token, Claims::getSubject);
+    public String getSubjectFromToken(String token) {
+        return getClaimFromToken(token,Claims::getSubject);
     }
-    public final Date getExpirationFromToken(String token){
-       return getClaimFromToken(token,Claims::getExpiration);
+    public Date getExpirationFromToken(String token) {
+        return getClaimFromToken(token,Claims::getExpiration);
     }
-    public final boolean isTokenExpired(String token){
+    public final boolean isTokenExpired(String token) {
         return getExpirationFromToken(token).before(new Date());
     }
-    public final boolean isTokenValid(String token,String username){
-        String tokenUsername=getClaimFromToken(token,Claims::getSubject);
-        return tokenUsername!=null && !isTokenExpired(token) && tokenUsername.equals(username);
+    public final boolean isTokenValid(String token, String username) {
+        return getSubjectFromToken(token)!=null&&isTokenExpired(token)&&getSubjectFromToken(token).equals(username);
     }
+
 
 }
