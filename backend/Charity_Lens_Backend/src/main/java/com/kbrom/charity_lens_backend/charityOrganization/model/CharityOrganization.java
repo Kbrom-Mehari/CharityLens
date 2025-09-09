@@ -1,7 +1,9 @@
 package com.kbrom.charity_lens_backend.charityOrganization.model;
 
+import com.kbrom.charity_lens_backend.campaign.model.Campaign;
 import com.kbrom.charity_lens_backend.focusArea.FocusArea;
 import com.kbrom.charity_lens_backend.project.model.Project;
+import com.kbrom.charity_lens_backend.user.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,16 +18,16 @@ public class CharityOrganization {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false,unique = true)
-    private  String name;
-    @Column(nullable = false)
-    private  String phone;
-    @Column(nullable = false,unique = true)
-    private  String email;
-    @Column(nullable = false)
-    private String password;
-    @OneToMany(mappedBy="organization")
+    private  String organizationName;
+    @OneToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="user_id",nullable = false)
+    private User user;
+
+    @OneToMany(mappedBy="organization",fetch = FetchType.LAZY)
     private List<Project> projects=new ArrayList<>();
-    private boolean isFlagged=false;
+    @OneToMany(mappedBy = "organization",fetch = FetchType.LAZY)
+    private List<Campaign> campaigns=new ArrayList<>();
+
     @ManyToMany
     @JoinTable(
         name="charity_organization_focus_areas",
@@ -33,6 +35,4 @@ public class CharityOrganization {
         inverseJoinColumns=@JoinColumn(name="focus_area_id")
     )
     private List<FocusArea> focusAreas=new ArrayList<>();
-
-
 }
