@@ -35,11 +35,7 @@ public class UserService {
           User user = userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User Not Found"));
           userRepository.delete(user);
       }
-      public GetUserDTO createUser(RegisterUserDTO registerUserDTO){
-          User user = registerUserMapper.toUser(registerUserDTO);
-          User createdUser= userRepository.save(user);
-          return getUserMapper.toDTO(createdUser);
-      }
+
       public GetUserDTO updateUser(UserUpdateDTO updateUserDTO, Long id) {
           User oldUser=userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User Not Found"));
           if(updateUserDTO.getFirstName()!=null) {
