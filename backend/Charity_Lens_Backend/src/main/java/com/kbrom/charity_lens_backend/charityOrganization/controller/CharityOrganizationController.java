@@ -1,7 +1,6 @@
 package com.kbrom.charity_lens_backend.charityOrganization.controller;
 
 import com.kbrom.charity_lens_backend.charityOrganization.dto.GetOrganizationDTO;
-import com.kbrom.charity_lens_backend.charityOrganization.dto.RegisterOrganizationDTO;
 import com.kbrom.charity_lens_backend.charityOrganization.dto.UpdateOrganizationDTO;
 import com.kbrom.charity_lens_backend.charityOrganization.service.CharityOrganizationService;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +15,6 @@ import java.util.List;
 public class CharityOrganizationController {
     private final CharityOrganizationService charityOrganizationService;
 
-    @PostMapping
-    public ResponseEntity<GetOrganizationDTO> registerUser(@RequestBody RegisterOrganizationDTO registerOrganizationDTO) {
-       GetOrganizationDTO org= charityOrganizationService.registerOrganization(registerOrganizationDTO);
-       return ResponseEntity.ok(org);
-    }
     @GetMapping
     public ResponseEntity<List<GetOrganizationDTO>> findAll() {
         List<GetOrganizationDTO> organizations= charityOrganizationService.findAllOrganizations();
