@@ -39,13 +39,6 @@ public class UserController {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
-    @PostMapping
-    public ResponseEntity<GetUserDTO> registerUser(RegisterUserDTO registerUserDTO) {
-        GetUserDTO createdUser=userService.createUser(registerUserDTO);
-        URI location=URI.create("/user/"+createdUser.getId());
-        return ResponseEntity.created(location).body(createdUser);
-
-    }
     @PatchMapping("/{id}")
     public ResponseEntity<GetUserDTO> updateUser(@PathVariable Long id, UserUpdateDTO updateUserDTO) {
         GetUserDTO updated= userService.updateUser(updateUserDTO,id);
