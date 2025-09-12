@@ -1,5 +1,6 @@
 package com.kbrom.charity_lens_backend.auth.security;
 
+import com.kbrom.charity_lens_backend.auth.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
