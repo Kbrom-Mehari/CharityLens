@@ -1,5 +1,6 @@
 package com.kbrom.charity_lens_backend.auth.security;
 
+import com.kbrom.charity_lens_backend.auth.service.CustomUserDetailsService;
 import com.kbrom.charity_lens_backend.auth.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
