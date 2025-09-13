@@ -4,9 +4,11 @@ import com.kbrom.charity_lens_backend.charityOrganization.model.CharityOrganizat
 import com.kbrom.charity_lens_backend.user.enums.Gender;
 import com.kbrom.charity_lens_backend.user.enums.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
@@ -22,14 +24,13 @@ public class User {
 
     private String lastName;
     @Column(nullable = false,unique = true)
-    @Email(message="Enter a valid email address")
     private String email;
     @Column(unique = true)
     private String phoneNumber;
     private String password;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private List<Role> roles=new ArrayList<>();
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private boolean isFlagged=false;
