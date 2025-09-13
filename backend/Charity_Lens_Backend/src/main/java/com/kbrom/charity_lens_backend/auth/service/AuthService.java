@@ -1,6 +1,6 @@
 package com.kbrom.charity_lens_backend.auth.service;
 
-import com.kbrom.charity_lens_backend.auth.dto.AuthResponse;
+import com.kbrom.charity_lens_backend.auth.dto.AuthResponseDTO;
 import com.kbrom.charity_lens_backend.auth.dto.LoginRequestDTO;
 import com.kbrom.charity_lens_backend.auth.dto.RegisterCharityOrganizationDTO;
 import com.kbrom.charity_lens_backend.auth.dto.RegisterDonorDTO;
@@ -12,11 +12,18 @@ import com.kbrom.charity_lens_backend.common.exception.ResourceNotFoundException
 import com.kbrom.charity_lens_backend.user.enums.Role;
 import com.kbrom.charity_lens_backend.user.model.User;
 import com.kbrom.charity_lens_backend.user.repository.UserRepository;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -26,8 +33,10 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService  jwtService;
     private final CharityOrganizationRepository charityOrganizationRepository;
+    private final AuthenticationManager authenticationManager;
+
     @Transactional
-    public AuthResponse registerUser(RegisterDonorDTO registerDonorDTO) {
+    public AuthResponseDTO registerUser(RegisterDonorDTO registerDonorDTO) {
        checkEmailExists(registerDonorDTO.getEmail());
        checkUsernameExists(registerDonorDTO.getUsername());
       User user=new User();
@@ -37,14 +46,14 @@ public class AuthService {
       user.setLastName(registerDonorDTO.getLastName());
       user.setUsername(registerDonorDTO.getUsername());
       user.setGender(registerDonorDTO.getGender());
-      user.setRole(Role.DONOR);
+      user.setRoles(List.of(Role.DONOR));
       userRepository.save(user);
 
-      String token=jwtService.generateToken(Map.of("role","DONOR"),user.getUsername());
-      return new AuthResponse(token,user.getUsername(),user.getRole());
+      String token=jwtService.generateToken(Map.of("roles",user.getRoles()),user.getUsername());
+      return new AuthResponseDTO(token,jwtService.getExpirationFromToken(token),user.getUsername(),user.getRoles().stream().map(Role::name).toList());
     }
     @Transactional
-    public AuthResponse registerOrganization(RegisterCharityOrganizationDTO registerCharityOrganizationDTO){
+    public AuthResponseDTO registerOrganization( RegisterCharityOrganizationDTO registerCharityOrganizationDTO){
         checkEmailExists(registerCharityOrganizationDTO.getEmail());
         checkUsernameExists(registerCharityOrganizationDTO.getUsername());
        CharityOrganization charityOrganization=new CharityOrganization();
@@ -52,7 +61,7 @@ public class AuthService {
        user.setUsername(registerCharityOrganizationDTO.getUsername());
        user.setEmail(registerCharityOrganizationDTO.getEmail());
        user.setPassword(passwordEncoder.encode(registerCharityOrganizationDTO.getPassword()));
-       user.setRole(Role.CHARITY_ORG);
+       user.setRoles(List.of(Role.CHARITY_ORG));
        userRepository.save(user);
 
        charityOrganization.setOrganizationName(registerCharityOrganizationDTO.getOrganizationName());
@@ -60,27 +69,21 @@ public class AuthService {
        charityOrganizationRepository.save(charityOrganization);
 
 
-       String token =jwtService.generateToken(Map.of("role","CHARITY_ORG"),user.getUsername());
-       return new AuthResponse(token,user.getUsername(),user.getRole());
+       String token =jwtService.generateToken(Map.of("roles",user.getRoles()),user.getUsername());
+       return new AuthResponseDTO(token,jwtService.getExpirationFromToken(token),user.getUsername(),user.getRoles().stream().map(Role::name).toList());
    }
-   public AuthResponse login(LoginRequestDTO loginRequestDTO){
-        User user;
-        if(loginRequestDTO.getLogin().contains("@")){
-            user=userRepository.findByEmail(loginRequestDTO.getLogin()).orElseThrow(()->new ResourceNotFoundException("User not found"));
-        }
-        else {
-            user = userRepository.findByUsername(loginRequestDTO.getLogin()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        }
-       if(passwordEncoder.matches(loginRequestDTO.getPassword(),user.getPassword())){
-           String token=jwtService.generateToken(Map.of("role",user.getRole().name()),user.getUsername());
-           return new AuthResponse(token,user.getUsername(),user.getRole());
-       }
-       else{
-           throw new InvalidCredentialsException("Incorrect password");
-       }
+   public AuthResponseDTO login(@NotNull LoginRequestDTO loginRequestDTO){
+       UsernamePasswordAuthenticationToken authToken= new UsernamePasswordAuthenticationToken(
+               loginRequestDTO.getLogin(),loginRequestDTO.getPassword()
+       );
+       Authentication authentication = authenticationManager.authenticate(authToken);
+       User user = (User) authentication.getPrincipal();
+       String token=jwtService.generateToken(Map.of("roles",user.getRoles().stream().map(Role::name).toList()),user.getUsername());
+
+       return new AuthResponseDTO(token,jwtService.getExpirationFromToken(token),user.getUsername(),user.getRoles().stream().map(Role::name).toList());
+   }
 
 
-   }
    private void checkEmailExists(String email) {
        if(userRepository.existsByEmail(email)){
            throw new DuplicateEntryException("Email already in use");
@@ -88,7 +91,7 @@ public class AuthService {
    }
    private void checkUsernameExists(String username) {
        if(userRepository.existsByUsername(username)){
-           throw new DuplicateEntryException("Username already in use");
+           throw new DuplicateEntryException("Username already taken");
        }
    }
 
