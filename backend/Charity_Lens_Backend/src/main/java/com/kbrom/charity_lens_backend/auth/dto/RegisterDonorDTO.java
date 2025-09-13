@@ -16,11 +16,11 @@ public class RegisterDonorDTO {
     @Email(message = "email address must be valid")
     private String email;
     @Size(min=8, max=20,message = "password must be 8-20 characters")
+    @NotBlank(message = "password is required")
     private String password;
     private String firstName;
     private String lastName;
     @NotNull(message = "gender is required")
     private Gender gender;
     private String phoneNumber;
-
 }
