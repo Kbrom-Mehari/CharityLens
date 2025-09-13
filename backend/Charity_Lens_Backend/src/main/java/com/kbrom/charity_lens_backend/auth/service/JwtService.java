@@ -7,6 +7,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -67,8 +68,8 @@ public class JwtService{
     public final boolean isTokenExpired(String token) {
         return getExpirationFromToken(token).before(new Date());
     }
-    public final boolean isTokenValid(String token, String username) {
-        return getSubjectFromToken(token)!=null&&isTokenExpired(token)&&getSubjectFromToken(token).equals(username);
+    public final boolean isTokenValid(String token, UserDetails userDetails) {
+        return getSubjectFromToken(token)!=null&&isTokenExpired(token)&&getSubjectFromToken(token).equals(userDetails.getUsername());
     }
 
 
