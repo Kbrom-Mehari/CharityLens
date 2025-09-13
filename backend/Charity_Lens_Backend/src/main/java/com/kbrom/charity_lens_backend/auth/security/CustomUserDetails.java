@@ -21,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
     }
     public record UserSecurityDTO(Long id, String username, String email, Role role,boolean enabled) {}
     public UserSecurityDTO getDomainUser(){
-        return new UserSecurityDTO(user.getId(),user.getUsername(),user.getEmail(),user.getRole(),user.isEnabled());
+        return new UserSecurityDTO(user.getId(),user.getUsername(),user.getEmail(),user.getRoles(),user.isEnabled());
     }
     public Long getId(){
         return user.getId();
@@ -52,7 +52,7 @@ public class CustomUserDetails implements UserDetails {
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_"+user.getRole().name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_"+user.getRoles().stream().map(Role::name).toList()));
     }
     @Override
     public boolean equals(Object o){
