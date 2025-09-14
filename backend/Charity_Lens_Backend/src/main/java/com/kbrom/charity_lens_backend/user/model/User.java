@@ -34,7 +34,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private boolean isFlagged=false;
-    private boolean isEnabled=true;
+    private boolean isEnabled=false;
     @OneToOne(mappedBy = "user")
     private CharityOrganization organizationProfile;
 }
