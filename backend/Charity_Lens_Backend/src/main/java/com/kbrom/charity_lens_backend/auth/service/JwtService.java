@@ -72,5 +72,4 @@ public class JwtService{
         return getSubjectFromToken(token)!=null&&isTokenExpired(token)&&getSubjectFromToken(token).equals(userDetails.getUsername());
     }
 
-
 }
