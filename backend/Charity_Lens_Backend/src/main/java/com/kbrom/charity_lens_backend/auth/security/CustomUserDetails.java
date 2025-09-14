@@ -19,9 +19,10 @@ public class CustomUserDetails implements UserDetails {
     public static CustomUserDetails from(User user) {
         return new CustomUserDetails(user);
     }
-    public record UserSecurityDTO(Long id, String username, String email, Role role,boolean enabled) {}
+    public record UserSecurityDTO(Long id, String username, String email, List<Role> roles,boolean enabled) {}
     public UserSecurityDTO getDomainUser(){
-        return new UserSecurityDTO(user.getId(),user.getUsername(),user.getEmail(),user.getRoles(),user.isEnabled());
+        List<Role> roles=user.getRoles()==null? List.of():user.getRoles();
+        return new UserSecurityDTO(user.getId(),user.getUsername(),user.getEmail(),roles,user.isEnabled());
     }
     public Long getId(){
         return user.getId();
@@ -52,7 +53,8 @@ public class CustomUserDetails implements UserDetails {
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_"+user.getRoles().stream().map(Role::name).toList()));
+       List<Role> roles=user.getRoles()==null? List.of():user.getRoles();
+       return roles.stream().map(role->new SimpleGrantedAuthority("ROLE_"+role.name())).toList();
     }
     @Override
     public boolean equals(Object o){
