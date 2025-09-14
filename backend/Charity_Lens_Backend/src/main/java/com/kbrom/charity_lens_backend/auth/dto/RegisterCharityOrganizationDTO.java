@@ -14,6 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 public class RegisterCharityOrganizationDTO {
+    @NotBlank(message = "organization name is required")
     private String organizationName;
 
     private String phoneNumber;
