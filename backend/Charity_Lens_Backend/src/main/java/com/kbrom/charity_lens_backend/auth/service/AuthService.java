@@ -1,13 +1,12 @@
 package com.kbrom.charity_lens_backend.auth.service;
 
-import com.kbrom.charity_lens_backend.auth.dto.AuthResponseDTO;
-import com.kbrom.charity_lens_backend.auth.dto.LoginRequestDTO;
-import com.kbrom.charity_lens_backend.auth.dto.RegisterCharityOrganizationDTO;
-import com.kbrom.charity_lens_backend.auth.dto.RegisterDonorDTO;
+import com.kbrom.charity_lens_backend.auth.dto.*;
 import com.kbrom.charity_lens_backend.auth.security.CustomUserDetails;
 import com.kbrom.charity_lens_backend.charityOrganization.model.CharityOrganization;
 import com.kbrom.charity_lens_backend.charityOrganization.repository.CharityOrganizationRepository;
 import com.kbrom.charity_lens_backend.common.exception.DuplicateEntryException;
+import com.kbrom.charity_lens_backend.donorProfile.DonorProfile;
+import com.kbrom.charity_lens_backend.donorProfile.DonorProfileRepository;
 import com.kbrom.charity_lens_backend.user.enums.Role;
 import com.kbrom.charity_lens_backend.user.model.User;
 import com.kbrom.charity_lens_backend.user.repository.UserRepository;
@@ -21,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -29,29 +29,29 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService  jwtService;
     private final CharityOrganizationRepository charityOrganizationRepository;
+    private final DonorProfileRepository donorProfileRepository;
     private final AuthenticationManager authenticationManager;
+    private final EmailVerificationService emailVerificationService;
 
     @Transactional
-    public AuthResponseDTO registerUser(RegisterDonorDTO registerDonorDTO) {
+    public void registerDonor(RegisterDonorDTO registerDonorDTO) {
        checkEmailExists(registerDonorDTO.getEmail());
        checkUsernameExists(registerDonorDTO.getUsername());
       User user=new User();
+      DonorProfile donorProfile=new DonorProfile();
       user.setEmail(registerDonorDTO.getEmail());
       user.setPassword(passwordEncoder.encode(registerDonorDTO.getPassword()));
-      user.setFirstName(registerDonorDTO.getFirstName());
-      user.setLastName(registerDonorDTO.getLastName());
       user.setUsername(registerDonorDTO.getUsername());
-      user.setGender(registerDonorDTO.getGender());
-      user.setRoles(List.of(Role.DONOR));
-
-        // I will implement email verification here - mandatory
+      user.getRoles().add(Role.DONOR);
 
       userRepository.save(user);
+      donorProfile.setUser(user);
+      donorProfileRepository.save(donorProfile);
 
-      return login(new LoginRequestDTO(registerDonorDTO.getEmail(),registerDonorDTO.getPassword()));
+      emailVerificationService.sendVerificationEmail(user);
     }
     @Transactional
-    public AuthResponseDTO registerOrganization( RegisterCharityOrganizationDTO registerCharityOrganizationDTO){
+    public void registerCharityOrganization(RegisterCharityOrganizationDTO registerCharityOrganizationDTO){
         checkEmailExists(registerCharityOrganizationDTO.getEmail());
         checkUsernameExists(registerCharityOrganizationDTO.getUsername());
        CharityOrganization charityOrganization=new CharityOrganization();
@@ -59,9 +59,8 @@ public class AuthService {
        user.setUsername(registerCharityOrganizationDTO.getUsername());
        user.setEmail(registerCharityOrganizationDTO.getEmail());
        user.setPassword(passwordEncoder.encode(registerCharityOrganizationDTO.getPassword()));
-       user.setRoles(List.of(Role.CHARITY_ORG));
+       user.getRoles().add(Role.CHARITY_ORG);
 
-        // I will implement email verification here - mandatory
 
        userRepository.save(user);
 
@@ -69,7 +68,7 @@ public class AuthService {
        charityOrganization.setUser(user);
        charityOrganizationRepository.save(charityOrganization);
 
-     return login(new LoginRequestDTO(registerCharityOrganizationDTO.getEmail(),registerCharityOrganizationDTO.getPassword()));
+       emailVerificationService.sendVerificationEmail(user);
 
    }
    public AuthResponseDTO login(LoginRequestDTO loginRequestDTO){
@@ -78,8 +77,8 @@ public class AuthService {
        );
        Authentication authentication = authenticationManager.authenticate(authToken);
        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-       CustomUserDetails.UserSecurityDTO user=userDetails.getDomainUser();
-       String token=jwtService.generateToken(Map.of("roles",user.roles().stream().map(Role::name).toList()),user.username());
+       UserSecurityDTO user=userDetails.getDomainUser();
+       String token=jwtService.generateToken(userDetails);
 
        return new AuthResponseDTO(token,jwtService.getExpirationFromToken(token),user.username(),user.roles().stream().map(Role::name).toList());
    }
@@ -95,5 +94,6 @@ public class AuthService {
            throw new DuplicateEntryException("Username already taken");
        }
    }
+
 
 }
