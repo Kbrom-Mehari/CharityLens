@@ -4,6 +4,7 @@ import com.kbrom.charity_lens_backend.auth.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -38,8 +39,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) //CsrfConfigurer class extends AbstractHttpConfigurer. same as CsrfConfigurer::disable
-                .authorizeHttpRequests(auth->auth.requestMatchers("/api/v1/auth/**").permitAll()
-                .anyRequest().authenticated()
+                .authorizeHttpRequests(auth->auth
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH,"/abc/def/**").hasRole("SYS_ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/ghi/jkl/**").hasAnyRole("SYS_ADMIN", "CHARITY_ORG")
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
