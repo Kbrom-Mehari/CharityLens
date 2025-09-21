@@ -1,5 +1,6 @@
 package com.kbrom.charity_lens_backend.user.controller;
 
+import com.kbrom.charity_lens_backend.common.dto.ApiResponse;
 import com.kbrom.charity_lens_backend.user.dto.UpdateDonorProfileDTO;
 import com.kbrom.charity_lens_backend.user.model.User;
 import com.kbrom.charity_lens_backend.user.service.UserService;
@@ -43,5 +44,9 @@ public class UserController {
     public ResponseEntity<GetDonorProfileDTO> updateDonorProfile(@PathVariable Long id, UpdateDonorProfileDTO updateUserDTO) {
         GetDonorProfileDTO updated= userService.updateDonorProfile(updateUserDTO,id);
         return ResponseEntity.ok(updated);
+    }
+    public ResponseEntity<ApiResponse> disableUser(@PathVariable Long id) {
+        userService.disableUserById(id);
+        return ResponseEntity.ok().body(new ApiResponse("User disabled !",true));
     }
 }
