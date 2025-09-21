@@ -7,6 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties(prefix="jwt")
 public class JwtProperties {
-    private String secret;
-    private long expiration;
+    private String authJwtSecret;
+    private String emailJwtSecret;
+    private long emailJwtValiditySeconds;
+    private long authJwtValiditySeconds;
 }
