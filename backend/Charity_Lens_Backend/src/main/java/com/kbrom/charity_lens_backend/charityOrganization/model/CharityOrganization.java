@@ -22,6 +22,7 @@ public class CharityOrganization {
     @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="user_id",nullable = false)
     private User user;
+    private String website;
 
     @OneToMany(mappedBy="organization",fetch = FetchType.LAZY)
     private List<Project> projects=new ArrayList<>();
