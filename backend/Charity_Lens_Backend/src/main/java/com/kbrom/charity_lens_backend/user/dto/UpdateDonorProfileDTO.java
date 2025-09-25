@@ -8,6 +8,5 @@ import lombok.Setter;
 public class UpdateDonorProfileDTO {
     private String firstName;
     private String lastName;
-    private String username;
-    private String password;
+    private String phoneNumber;
 }
