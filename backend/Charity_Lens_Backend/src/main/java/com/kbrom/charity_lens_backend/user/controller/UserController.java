@@ -1,5 +1,6 @@
 package com.kbrom.charity_lens_backend.user.controller;
 
+import com.kbrom.charity_lens_backend.auth.dto.ChangePasswordDTO;
 import com.kbrom.charity_lens_backend.common.dto.ApiResponse;
 import com.kbrom.charity_lens_backend.user.dto.UpdateDonorProfileDTO;
 import com.kbrom.charity_lens_backend.user.model.User;
@@ -10,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.kbrom.charity_lens_backend.user.dto.GetDonorProfileDTO;
 
+import java.lang.module.ResolutionException;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -45,8 +48,22 @@ public class UserController {
         GetDonorProfileDTO updated= userService.updateDonorProfile(updateUserDTO,id);
         return ResponseEntity.ok(updated);
     }
+    @GetMapping("/{id}/flag")
+    @PreAuthorize("hasRole('SYS_ADMIN')")
+    public ResponseEntity<ApiResponse> flagUser(@PathVariable Long id) {
+        userService.flagUserById(id);
+        return ResponseEntity.ok().body(new ApiResponse("User flagged !",true));
+    }
+    @GetMapping("/{id}/disable-account")
+    @PreAuthorize("hasRole('SYS_ADMIN')or #id==authenticated.principal.id")
     public ResponseEntity<ApiResponse> disableUser(@PathVariable Long id) {
         userService.disableUserById(id);
         return ResponseEntity.ok().body(new ApiResponse("User disabled !",true));
+    }
+    @PutMapping("/update/password/{id}")
+    @PreAuthorize("#id==authenticated.principal.id")
+    public ResponseEntity<ApiResponse> changePassword (@PathVariable Long id, @RequestBody ChangePasswordDTO changePasswordDTO, Principal principal) {
+        userService.changePassword(id,changePasswordDTO,principal);
+        return ResponseEntity.ok().body(new ApiResponse("Password changed !",true));
     }
 }
