@@ -1,0 +1,37 @@
+package com.kbrom.charity_lens_backend.user.charityOrganization;
+
+import com.kbrom.charity_lens_backend.user.dto.GetOrganizationDTO;
+import com.kbrom.charity_lens_backend.user.dto.UpdateOrganizationDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/organization")
+@RequiredArgsConstructor
+public class CharityOrganizationController {
+    private final CharityOrganizationService charityOrganizationService;
+
+    @GetMapping
+    public ResponseEntity<List<GetOrganizationDTO>> findAll() {
+        List<GetOrganizationDTO> organizations= charityOrganizationService.findAllOrganizations();
+        return ResponseEntity.ok().body(organizations);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<GetOrganizationDTO> findById(@PathVariable Long id) {
+        GetOrganizationDTO org = charityOrganizationService.getOrganizationById(id);
+        return ResponseEntity.ok().body(org);
+    }
+    @PatchMapping("/{id}")
+    public ResponseEntity<GetOrganizationDTO> updateOrganization(@PathVariable Long id, @RequestBody UpdateOrganizationDTO updateOrganizationDTO) {
+        GetOrganizationDTO org= charityOrganizationService.updateOrganization(id,updateOrganizationDTO);
+        return ResponseEntity.ok(org);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id){
+        charityOrganizationService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}
